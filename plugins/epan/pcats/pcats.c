@@ -13,6 +13,7 @@ static int proto_pcats = -1;
 static dissector_handle_t proto_xml = NULL;
 
 static int hf_pcats_xml_length = -1;
+static int hf_pcats_tag = -1;
 static gint ett_pcats = -1;
 static gint ett_xml = -1;
 
@@ -46,6 +47,10 @@ dissect_pcats_message(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void 
     while (xml_frame)
     {
         if (xml_frame->name && strcmp(xml_frame->name, "xml") != 0) {
+            proto_tree_add_string(
+                pcats_tree, hf_pcats_tag, tvb,
+                xml_frame->start_offset, xml_frame->length,
+                xml_frame->name);
             col_append_str(pinfo->cinfo, COL_INFO, xml_frame->name);
             break;
         }
@@ -80,7 +85,13 @@ proto_register_pcats(void)
             FT_UINT64, BASE_DEC,
             NULL, 0x0,
             NULL, HFILL }
-        }
+        },
+        { &hf_pcats_tag,
+            { "PCATS Tag", "pcats.tag",
+            FT_STRINGZ, BASE_NONE,
+            NULL, 0x0,
+            NULL, HFILL }
+        },
     };
 
     /* register the protocol */
